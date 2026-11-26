@@ -127,6 +127,19 @@ To revive your downed friend, simply hold **right-click** with an empty hand on 
   // Min: 0 (instant), Max: 999999999999999999 (virtually impossible)
   "REVIVE_DURATION_TICKS": 60,
   
+  // Shows a few end rod particles on downed players for everyone nearby, because Geyser Bedrock clients
+  // can't see the glow outline. One small packet per interval per downed player.
+  // Options: true, false
+  "DOWNED_PARTICLES_ENABLED": true,
+
+  // Ticks between particle bursts (20 per second)
+  // Min: 1, Max: 2147483647
+  "DOWNED_PARTICLE_INTERVAL_TICKS": 10,
+
+  // Colors the REVIVE tag above the downed player (and so its timer) from yellow to dark red as they bleed out
+  // Options: true, false
+  "COLOR_REVIVE_TAG_BY_BLEED_OUT_TIME": true,
+
   // How many ticks a revive may be invalid (aim drifted off, brief hand change, etc.) before it is cancelled.
   // Progress is paused, not lost, during this grace window. Helps Geyser Bedrock clients, which send
   // interact packets sparsely, and downed players that shift a little while being revived.

@@ -7,6 +7,7 @@ import com.phasmoware.down_but_not_out.StateManager;
 import com.phasmoware.down_but_not_out.util.Constants;
 import com.phasmoware.down_but_not_out.util.SoundUtility;
 import com.phasmoware.down_but_not_out.util.TeamUtility;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -36,6 +37,7 @@ public class BleedOutTimer {
     public void tick() {
         if (isDowned(player)) {
             tickHeartbeats();
+            tickIndicatorParticles();
             updateDownedHealthAndHunger();
             if (playerIsNotGettingRevived()) {
                 updateSecondsUntilBleedOut();
@@ -79,6 +81,15 @@ public class BleedOutTimer {
         }
     }
 
+    // Geyser Bedrock clients can't see the glow outline, but they do render particles and custom names
+    private void tickIndicatorParticles() {
+        int interval = ModConfig.INSTANCE.DOWNED_PARTICLE_INTERVAL_TICKS;
+        if (ModConfig.INSTANCE.DOWNED_PARTICLES_ENABLED && interval > 0 && player.tickCount % interval == 0) {
+            player.level().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(),
+                    3, 0.2, 0.5, 0.2, 0.01);
+        }
+    }
+
     private void tickReviveCooldown() {
         if (reviveCooldownTicks > 0) {
             reviveCooldownTicks--;
@@ -113,7 +124,11 @@ public class BleedOutTimer {
             ServerPlayerDuck serverPlayer = (ServerPlayerDuck) player;
             if (ModConfig.INSTANCE.SHOW_REVIVE_TAG_ABOVE_PLAYER) {
                 if (serverPlayer.dbno$getInvisibleArmorStandEntity() != null) {
-                    serverPlayer.dbno$getInvisibleArmorStandEntity().setCustomName(Component.literal(Constants.CUSTOM_REVIVE_TAG_ABOVE_NAME + " " + (ticksUntilBleedOut / 20) + "s"));
+                    Component tag = Component.literal(Constants.CUSTOM_REVIVE_TAG_ABOVE_NAME + " " + (ticksUntilBleedOut / 20) + "s");
+                    if (ModConfig.INSTANCE.COLOR_REVIVE_TAG_BY_BLEED_OUT_TIME) {
+                        tag = tag.copy().withStyle(TeamUtility.getProgressColor(getCurrentProgress()));
+                    }
+                    serverPlayer.dbno$getInvisibleArmorStandEntity().setCustomName(tag);
                     serverPlayer.dbno$getInvisibleArmorStandEntity().setCustomNameVisible(true);
                 }
             }
