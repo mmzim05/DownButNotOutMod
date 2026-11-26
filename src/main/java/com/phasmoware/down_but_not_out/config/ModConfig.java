@@ -27,6 +27,7 @@ public final class ModConfig {
     public long REVIVE_GRACE_TICKS = 10L;
     public double REVIVE_AIM_TOLERANCE = 0.3D;
     public boolean DOWNED_LOCK_POSITION = false;
+    public float REVIVED_HEALTH = 0.0F;
 
     public ModConfig() {
     }

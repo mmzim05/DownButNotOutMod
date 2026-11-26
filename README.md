@@ -141,6 +141,10 @@ To revive your downed friend, simply hold **right-click** with an empty hand on 
   // entirely, so use it with a tiny DOWNED_MOVE_SPEED. Downed players are never pushed by other entities.
   // Options: true, false
   "DOWNED_LOCK_POSITION": false,
+  // Health in HP (2 per heart) a player gets back when revived, e.g. 6.0 for 3 hearts
+  // NOTE: while downed, food level is capped at 17, so natural regeneration needs the player to eat first
+  // Min: 0.0 (keep the sliver of health left while downed), Max: 1024.0 (capped at the player's max health)
+  "REVIVED_HEALTH": 0.0,
 
   // How loud and how far away the heartbeat sound plays for nearby players
   // Min: 0.0 (disabled) Max: 5.0
