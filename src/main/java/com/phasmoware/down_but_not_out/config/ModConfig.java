@@ -26,6 +26,7 @@ public final class ModConfig {
     public float DOWNED_MOVE_SPEED = 0.01F;
     public long REVIVE_GRACE_TICKS = 10L;
     public double REVIVE_AIM_TOLERANCE = 0.3D;
+    public boolean DOWNED_LOCK_POSITION = false;
 
     public ModConfig() {
     }

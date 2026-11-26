@@ -1,6 +1,7 @@
 package com.phasmoware.down_but_not_out.mixin;
 
 import com.mojang.authlib.GameProfile;
+import com.phasmoware.down_but_not_out.config.ModConfig;
 import com.phasmoware.down_but_not_out.mixinterface.ServerPlayerDuck;
 import com.phasmoware.down_but_not_out.timer.BleedOutTimer;
 import com.phasmoware.down_but_not_out.timer.ReviveTimer;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -37,6 +39,8 @@ public abstract class ServerPlayerEntityMixin extends Player implements ServerPl
     private ArmorStand invisibleArmorStandEntity;
     @Unique
     private Component lastUpdateText;
+    @Unique
+    private Vec3 downedAnchor;
 
     public ServerPlayerEntityMixin(Level world, GameProfile profile) {
         super(world, profile);
@@ -52,7 +56,16 @@ public abstract class ServerPlayerEntityMixin extends Player implements ServerPl
         bleedOutTimer.tick();
         if (isDowned(this)) {
             ServerCrawlUtility.forceCrawlPose(this);
+            if (ModConfig.INSTANCE.DOWNED_LOCK_POSITION) {
+                ServerCrawlUtility.lockDownedPosition(this);
+            }
         }
+    }
+
+    // downed players must not be shoved around (keeps revive aim stable)
+    @Override
+    public boolean isPushable() {
+        return !isDowned(this) && super.isPushable();
     }
 
     @Override
@@ -93,6 +106,16 @@ public abstract class ServerPlayerEntityMixin extends Player implements ServerPl
     @Override
     public void dbno$setLastUpdateText(Component lastText) {
         this.lastUpdateText = lastText;
+    }
+
+    @Override
+    public Vec3 dbno$getDownedAnchor() {
+        return this.downedAnchor;
+    }
+
+    @Override
+    public void dbno$setDownedAnchor(Vec3 anchor) {
+        this.downedAnchor = anchor;
     }
 
     @Override

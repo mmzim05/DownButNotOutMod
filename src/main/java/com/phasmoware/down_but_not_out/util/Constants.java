@@ -32,6 +32,10 @@ public class Constants {
     public static final float MIN_TICK_PROGRESS = 1.0f;
     public static final double MIN_ENTITY_SCALE = 0.0625d;
     public static final double Y_OFFSET = 0.86;
+    // horizontal drift in blocks a locked downed player may have before being pulled back
+    public static final double DOWNED_LOCK_TOLERANCE = 0.1;
+    // further than this from the anchor means an external move (teleport, piston), so re-anchor
+    public static final double DOWNED_LOCK_MAX_SNAP_DISTANCE = 3.0;
     public static final long UPDATE_MSG_SPAM_COOLDOWN = 15;
     public static final long REPEAT_MSG_SPAM_COOLDOWN = 60;
     public static final int MIN_HEARTBEAT_INTERVAL = 10;

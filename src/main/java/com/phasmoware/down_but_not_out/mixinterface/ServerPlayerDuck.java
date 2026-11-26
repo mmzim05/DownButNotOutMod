@@ -5,6 +5,7 @@ import com.phasmoware.down_but_not_out.timer.ReviveTimer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.phys.Vec3;
 
 public interface ServerPlayerDuck {
 
@@ -23,6 +24,10 @@ public interface ServerPlayerDuck {
     Component dbno$getLastUpdateText();
 
     void dbno$setLastUpdateText(Component lastUpdateText);
+
+    Vec3 dbno$getDownedAnchor();
+
+    void dbno$setDownedAnchor(Vec3 anchor);
 
     long dbno$getTicksSinceLastUpdate();
 
