@@ -24,6 +24,7 @@ public final class ModConfig {
     public float REVIVED_SOUND_VOLUME = 2.5F;
     public float DOWNED_SOUND_VOLUME = 1.0F;
     public float DOWNED_MOVE_SPEED = 0.01F;
+    public float REVIVED_HEALTH = 0.0F;
 
     public ModConfig() {
     }

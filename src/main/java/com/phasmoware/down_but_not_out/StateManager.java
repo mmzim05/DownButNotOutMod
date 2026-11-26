@@ -59,6 +59,9 @@ public class StateManager {
         ReviveUtility.applyRevivedPenalty(serverPlayer);
         SoundUtility.playRevivedSound(player);
         DownedUtility.removeDownedState(player);
+        if (ModConfig.INSTANCE.REVIVED_HEALTH > 0.0F) {
+            player.setHealth(Math.min(ModConfig.INSTANCE.REVIVED_HEALTH, player.getMaxHealth()));
+        }
         ServerCrawlUtility.cleanUpForceCrawlEntities((ServerPlayerDuck) player);
     }
 
