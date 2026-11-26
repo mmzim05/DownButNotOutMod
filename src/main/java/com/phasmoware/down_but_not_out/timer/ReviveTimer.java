@@ -19,11 +19,8 @@ public class ReviveTimer {
     private final ServerPlayer downed;
     private boolean interactionActive = false;
     private long reviveProgressTicks;
-<<<<<<< HEAD
     private long invalidTicks;
-=======
     private int lastReportedStep = -1;
->>>>>>> fix/4-progress-message-flash
     @Nullable
     private ServerPlayer reviver;
 
