@@ -26,6 +26,9 @@ public final class ModConfig {
     public float DOWNED_MOVE_SPEED = 0.01F;
     public double MULTI_REVIVER_REDUCTION_PERCENT = 10.0D;
     public double MULTI_REVIVER_MIN_DURATION_PERCENT = 25.0D;
+    public boolean DOWNED_PARTICLES_ENABLED = true;
+    public int DOWNED_PARTICLE_INTERVAL_TICKS = 10;
+    public boolean COLOR_REVIVE_TAG_BY_BLEED_OUT_TIME = true;
     public long REVIVE_GRACE_TICKS = 10L;
     public double REVIVE_AIM_TOLERANCE = 0.3D;
     public boolean DOWNED_LOCK_POSITION = false;
