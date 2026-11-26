@@ -9,6 +9,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -78,6 +80,7 @@ public class ServerCrawlUtility {
     }
 
     public static void cleanUpForceCrawlEntities(ServerPlayerDuck player) {
+        player.dbno$setDownedAnchor(null);
         if (player.dbno$getInvisibleShulkerEntity() != null) {
             player.dbno$getInvisibleShulkerEntity().remove(Entity.RemovalReason.DISCARDED);
             player.dbno$setInvisibleShulkerEntity(null);
@@ -98,6 +101,32 @@ public class ServerCrawlUtility {
                 setInvisibleShulkerArmorStandRider(serverPlayer);
                 TeamUtility.assignShulkerAndArmorStandToTempDownedTeam(player);
             }
+        }
+    }
+
+    /**
+     * Keeps a downed player where they went down. Bedrock (Geyser) clients can slide
+     * while crawling even with no input, so pull the player back to the anchor once
+     * horizontal drift exceeds the tolerance. Vertical movement is left alone.
+     */
+    public static void lockDownedPosition(ServerPlayerDuck serverPlayer) {
+        ServerPlayer player = (ServerPlayer) serverPlayer;
+        Vec3 anchor = serverPlayer.dbno$getDownedAnchor();
+        if (anchor == null) {
+            serverPlayer.dbno$setDownedAnchor(player.position());
+            return;
+        }
+        double dx = player.getX() - anchor.x;
+        double dz = player.getZ() - anchor.z;
+        double distSq = dx * dx + dz * dz;
+        if (distSq > Constants.DOWNED_LOCK_MAX_SNAP_DISTANCE * Constants.DOWNED_LOCK_MAX_SNAP_DISTANCE) {
+            serverPlayer.dbno$setDownedAnchor(player.position());
+            return;
+        }
+        player.setDeltaMovement(0.0, player.getDeltaMovement().y, 0.0);
+        if (distSq > Constants.DOWNED_LOCK_TOLERANCE * Constants.DOWNED_LOCK_TOLERANCE) {
+            // absolute position, zero velocity, keep the client's current look direction
+            player.connection.teleport(new PositionMoveRotation(new Vec3(anchor.x, player.getY(), anchor.z), Vec3.ZERO, 0.0F, 0.0F), Relative.ROTATION);
         }
     }
 }

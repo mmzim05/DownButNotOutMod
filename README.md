@@ -127,6 +127,12 @@ To revive your downed friend, simply hold **right-click** with an empty hand on 
   // Min: 0 (instant), Max: 999999999999999999 (virtually impossible)
   "REVIVE_DURATION_TICKS": 60,
   
+  // Pulls downed players back to where they went down if they drift more than ~0.1 blocks horizontally
+  // (Geyser Bedrock clients can slide while crawling even with no input). Disables crawling movement
+  // entirely, so use it with a tiny DOWNED_MOVE_SPEED. Downed players are never pushed by other entities.
+  // Options: true, false
+  "DOWNED_LOCK_POSITION": false,
+
   // How loud and how far away the heartbeat sound plays for nearby players
   // Min: 0.0 (disabled) Max: 5.0
   "HEARTBEAT_SOUND_VOLUME": 1.0,
