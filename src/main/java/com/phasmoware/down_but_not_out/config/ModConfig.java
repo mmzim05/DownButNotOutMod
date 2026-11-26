@@ -29,6 +29,8 @@ public final class ModConfig {
     public boolean DOWNED_PARTICLES_ENABLED = true;
     public int DOWNED_PARTICLE_INTERVAL_TICKS = 10;
     public boolean COLOR_REVIVE_TAG_BY_BLEED_OUT_TIME = true;
+    public boolean REVIVER_SLOWNESS_ENABLED = true;
+    public int REVIVER_SLOWNESS_AMPLIFIER = 1;
     public long REVIVE_GRACE_TICKS = 10L;
     public double REVIVE_AIM_TOLERANCE = 0.3D;
     public boolean DOWNED_LOCK_POSITION = false;

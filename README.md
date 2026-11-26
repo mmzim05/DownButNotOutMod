@@ -148,6 +148,15 @@ To revive your downed friend, simply hold **right-click** with an empty hand on 
   // Options: true, false
   "COLOR_REVIVE_TAG_BY_BLEED_OUT_TIME": true,
 
+  // Slows players while they hold a revive (removed when they let go, finish or cancel)
+  // A Slowness effect the player already has is left alone
+  // Options: true, false
+  "REVIVER_SLOWNESS_ENABLED": true,
+
+  // Slowness level minus one: 0 = Slowness I, 1 = Slowness II
+  // Min: 0, Max: 255
+  "REVIVER_SLOWNESS_AMPLIFIER": 1,
+
   // How many ticks a revive may be invalid (aim drifted off, brief hand change, etc.) before it is cancelled.
   // Progress is paused, not lost, during this grace window. Helps Geyser Bedrock clients, which send
   // interact packets sparsely, and downed players that shift a little while being revived.

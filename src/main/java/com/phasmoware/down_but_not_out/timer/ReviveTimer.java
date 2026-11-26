@@ -9,6 +9,8 @@ import com.phasmoware.down_but_not_out.util.TeamUtility;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +27,7 @@ public class ReviveTimer {
     private static final class ReviverState {
         long ticksSinceInteract;
         long invalidTicks;
+        boolean slowed;
     }
 
     @NotNull
@@ -60,9 +63,11 @@ public class ReviveTimer {
                 // no interact packet for too long: use was released
                 ReviveUtility.notifyHoldReleased(reviver, downed);
                 released = true;
+                removeSlowness(reviver, state);
                 it.remove();
             } else if (ReviveUtility.checkValidReviver(reviver, downed, false)) {
                 state.invalidTicks = 0;
+                applySlowness(reviver, state);
                 counting++;
             } else if (isDowned(downed) && state.invalidTicks < ModConfig.INSTANCE.REVIVE_GRACE_TICKS) {
                 // Bedrock (Geyser) sends sparse interact packets and aim jitters, so
@@ -70,6 +75,7 @@ public class ReviveTimer {
                 state.invalidTicks++;
             } else {
                 ReviveUtility.checkValidReviver(reviver, downed, true);
+                removeSlowness(reviver, state);
                 it.remove();
             }
         }
@@ -131,7 +137,33 @@ public class ReviveTimer {
         }
     }
 
+    // Slowness is short (refreshed while holding) so it can never leak if the reviver disconnects or dies
+    private static void applySlowness(ServerPlayer reviver, ReviverState state) {
+        if (!ModConfig.INSTANCE.REVIVER_SLOWNESS_ENABLED) {
+            return;
+        }
+        if (!state.slowed) {
+            // don't clobber slowness the player has for another reason
+            if (reviver.hasEffect(MobEffects.SLOWNESS)) {
+                return;
+            }
+            state.slowed = true;
+        } else if (reviver.tickCount % Constants.REVIVER_SLOWNESS_REFRESH_TICKS != 0) {
+            return;
+        }
+        reviver.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, Constants.REVIVER_SLOWNESS_DURATION_TICKS,
+                ModConfig.INSTANCE.REVIVER_SLOWNESS_AMPLIFIER, false, false, false));
+    }
+
+    private static void removeSlowness(ServerPlayer reviver, ReviverState state) {
+        if (state.slowed) {
+            state.slowed = false;
+            reviver.removeEffect(MobEffects.SLOWNESS);
+        }
+    }
+
     public void stopReviveInteraction() {
+        revivers.forEach((reviver, state) -> removeSlowness(reviver, state));
         revivers.clear();
         interactionActive = false;
     }

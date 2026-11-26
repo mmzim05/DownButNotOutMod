@@ -38,6 +38,9 @@ public class Constants {
     public static final double DOWNED_LOCK_MAX_SNAP_DISTANCE = 3.0;
     // shortest allowed gap between interact packets before a revive counts as released
     public static final long MIN_REVIVE_HOLD_WINDOW_TICKS = 6;
+    // reviver slowness lasts this long and is refreshed while they hold, so a leak heals itself within a second
+    public static final int REVIVER_SLOWNESS_DURATION_TICKS = 20;
+    public static final int REVIVER_SLOWNESS_REFRESH_TICKS = 10;
     public static final long UPDATE_MSG_SPAM_COOLDOWN = 15;
     // revive progress is only announced each time it crosses a multiple of this many percent
     public static final int REVIVE_PROGRESS_MESSAGE_STEP_PERCENT = 10;
