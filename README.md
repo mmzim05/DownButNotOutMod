@@ -127,6 +127,16 @@ To revive your downed friend, simply hold **right-click** with an empty hand on 
   // Min: 0 (instant), Max: 999999999999999999 (virtually impossible)
   "REVIVE_DURATION_TICKS": 60,
   
+  // How many ticks a revive may be invalid (aim drifted off, brief hand change, etc.) before it is cancelled.
+  // Progress is paused, not lost, during this grace window. Helps Geyser Bedrock clients, which send
+  // interact packets sparsely, and downed players that shift a little while being revived.
+  // Min: 0 (cancel immediately), Max: 999999999999999999
+  "REVIVE_GRACE_TICKS": 10,
+
+  // How many blocks the downed player's hitbox is widened by when checking that the reviver is looking at them
+  // Min: 0.0 (exact hitbox)
+  "REVIVE_AIM_TOLERANCE": 0.3,
+
   // How loud and how far away the heartbeat sound plays for nearby players
   // Min: 0.0 (disabled) Max: 5.0
   "HEARTBEAT_SOUND_VOLUME": 1.0,

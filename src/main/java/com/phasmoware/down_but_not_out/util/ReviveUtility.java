@@ -27,13 +27,16 @@ public class ReviveUtility {
         Vec3 eyePos = viewer.getEyePosition(Constants.MIN_TICK_PROGRESS);
         Vec3 lookDir = viewer.getViewVector(Constants.MIN_TICK_PROGRESS);
         Vec3 rayEnd = eyePos.add(lookDir.scale(viewer.entityInteractionRange()));
-        // expand by a bit for stability
-        AABB targetBox = target.getBoundingBox().inflate(0.1);
+        // expand by a bit for stability (the downed hitbox is small and Bedrock aim jitters)
+        AABB targetBox = target.getBoundingBox().inflate(ModConfig.INSTANCE.REVIVE_AIM_TOLERANCE);
         Optional<Vec3> hit = targetBox.clip(eyePos, rayEnd);
         return hit.isPresent();
     }
 
-    public static boolean checkValidReviver(ServerPlayer reviver, ServerPlayer downed) {
+    /**
+     * @param notify whether to tell the players why the revive is invalid
+     */
+    public static boolean checkValidReviver(ServerPlayer reviver, ServerPlayer downed, boolean notify) {
         if (reviver == null || downed == null) {
             return false;
         }
@@ -48,20 +51,29 @@ public class ReviveUtility {
         }
         if (ModConfig.INSTANCE.RESTRICT_REVIVE_TO_TEAMMATES_OR_TEAMLESS) {
             if ((reviver.getTeam() != null && !TeamUtility.isOnTempDownedTeam(downed)) && (!reviver.getTeam().equals(downed.getTeam()))) {
-                MessageHandler.onPlayerRevivingFromDifferentTeam(reviver, downed);
+                if (notify) {
+                    MessageHandler.onPlayerRevivingFromDifferentTeam(reviver, downed);
+                }
                 return false;
             }
         }
         if ((!reviver.getMainHandItem().isEmpty() && ModConfig.INSTANCE.REVIVING_REQUIRES_EMPTY_HAND)) {
-            MessageHandler.onPlayerRevivingWithoutEmptyHand(reviver, downed);
+            if (notify) {
+                MessageHandler.onPlayerRevivingWithoutEmptyHand(reviver, downed);
+            }
             return false;
         }
-        if ((reviver.distanceToSqr(downed) > reviver.blockInteractionRange())) {
-            MessageHandler.onPlayerRevivingTooFarAway(reviver, downed);
+        double range = reviver.entityInteractionRange();
+        if (reviver.distanceToSqr(downed) > range * range) {
+            if (notify) {
+                MessageHandler.onPlayerRevivingTooFarAway(reviver, downed);
+            }
             return false;
         }
         if (!ReviveUtility.isLookingAtPlayer(reviver, downed)) {
-            MessageHandler.onPlayerLookingAwayWhileReviving(reviver, downed);
+            if (notify) {
+                MessageHandler.onPlayerLookingAwayWhileReviving(reviver, downed);
+            }
             return false;
         }
         return true;

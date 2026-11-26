@@ -11,11 +11,14 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static com.phasmoware.down_but_not_out.util.DownedUtility.isDowned;
+
 public class ReviveTimer {
     @NotNull
     private final ServerPlayer downed;
     private boolean interactionActive = false;
     private long reviveProgressTicks;
+    private long invalidTicks;
     @Nullable
     private ServerPlayer reviver;
 
@@ -26,7 +29,8 @@ public class ReviveTimer {
 
 
     public void tick() {
-        if (ReviveUtility.checkValidReviver(reviver, downed)) {
+        if (ReviveUtility.checkValidReviver(reviver, downed, false)) {
+            invalidTicks = 0;
             TeamUtility.updateRevivingTeamColor(downed);
             interactionActive = true;
             reviveProgressTicks++;
@@ -36,7 +40,12 @@ public class ReviveTimer {
                 StateManager.onReviveComplete(downed, reviver);
                 stopReviveInteraction();
             }
+        } else if (reviver != null && isDowned(downed) && invalidTicks < ModConfig.INSTANCE.REVIVE_GRACE_TICKS) {
+            // Bedrock (Geyser) sends sparse interact packets and aim jitters, so
+            // tolerate a short run of invalid ticks: keep the reviver, pause progress
+            invalidTicks++;
         } else if (interactionActive || reviver != null) {
+            ReviveUtility.checkValidReviver(reviver, downed, true);
             stopReviveInteraction();
         } else {
             stopReviveInteraction();
@@ -59,6 +68,7 @@ public class ReviveTimer {
     }
 
     public void stopReviveInteraction() {
+        this.invalidTicks = 0;
         if (this.reviver != null) {
             this.reviver = null;
         }
@@ -68,6 +78,7 @@ public class ReviveTimer {
     }
 
     public void continueRevive(ServerPlayer reviver) {
+        this.invalidTicks = 0;
         if (this.reviver != reviver) {
             this.reviver = reviver;
         }
