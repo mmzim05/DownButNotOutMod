@@ -5,9 +5,9 @@ import com.phasmoware.down_but_not_out.mixinterface.ServerPlayerDuck;
 import com.phasmoware.down_but_not_out.config.ModConfig;
 import com.phasmoware.down_but_not_out.StateManager;
 import com.phasmoware.down_but_not_out.util.Constants;
+import com.phasmoware.down_but_not_out.util.ParticleUtility;
 import com.phasmoware.down_but_not_out.util.SoundUtility;
 import com.phasmoware.down_but_not_out.util.TeamUtility;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -37,7 +37,7 @@ public class BleedOutTimer {
     public void tick() {
         if (isDowned(player)) {
             tickHeartbeats();
-            tickIndicatorParticles();
+            ParticleUtility.spawnDownedIndicator(player);
             updateDownedHealthAndHunger();
             if (playerIsNotGettingRevived()) {
                 updateSecondsUntilBleedOut();
@@ -78,15 +78,6 @@ public class BleedOutTimer {
             } else {
                 heartbeatCooldownTicks--;
             }
-        }
-    }
-
-    // Geyser Bedrock clients can't see the glow outline, but they do render particles and custom names
-    private void tickIndicatorParticles() {
-        int interval = ModConfig.INSTANCE.DOWNED_PARTICLE_INTERVAL_TICKS;
-        if (ModConfig.INSTANCE.DOWNED_PARTICLES_ENABLED && interval > 0 && player.tickCount % interval == 0) {
-            player.level().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(),
-                    3, 0.2, 0.5, 0.2, 0.01);
         }
     }
 

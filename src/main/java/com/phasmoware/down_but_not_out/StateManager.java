@@ -55,6 +55,7 @@ public class StateManager {
     }
 
     public static void onReviveComplete(ServerPlayer player, List<ServerPlayer> revivers) {
+        ParticleUtility.spawnReviveComplete(player);
         String reviverNames = revivers.stream().map(r -> r.getName().tryCollapseToString()).collect(Collectors.joining(" and "));
         MessageHandler.broadcastMessageToPlayers(reviverNames +
                 Constants.REVIVED_MSG + player.getName().tryCollapseToString(), player.level(), ChatFormatting.GREEN);
