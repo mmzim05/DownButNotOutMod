@@ -31,6 +31,11 @@ public final class ModConfig {
     public boolean COLOR_REVIVE_TAG_BY_BLEED_OUT_TIME = true;
     public boolean REVIVER_SLOWNESS_ENABLED = true;
     public int REVIVER_SLOWNESS_AMPLIFIER = 1;
+    public String DOWNED_PARTICLE_TYPE = "minecraft:angry_villager";
+    public boolean REVIVE_PARTICLES_ENABLED = true;
+    public String REVIVE_PARTICLE_TYPE = "minecraft:happy_villager";
+    public int REVIVE_PARTICLE_INTERVAL_TICKS = 2;
+    public String REVIVE_COMPLETE_PARTICLE_TYPE = "minecraft:heart";
     public long REVIVE_GRACE_TICKS = 10L;
     public double REVIVE_AIM_TOLERANCE = 0.3D;
     public boolean DOWNED_LOCK_POSITION = false;

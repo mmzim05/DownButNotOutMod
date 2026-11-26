@@ -135,14 +135,33 @@ To revive your downed friend, simply hold **right-click** with an empty hand on 
   // The revive never takes less than this percent of REVIVE_DURATION_TICKS, however many revivers help
   // Min: 1.0, Max: 100.0
   "MULTI_REVIVER_MIN_DURATION_PERCENT": 25.0,
-  // Shows a few end rod particles on downed players for everyone nearby, because Geyser Bedrock clients
-  // can't see the glow outline. One small packet per interval per downed player.
+  // Shows a small ring of particles on downed players for everyone nearby, because Geyser Bedrock clients
+  // can't see the glow outline. Only parameterless particles that Geyser maps 1:1 should be used (avoid dust),
+  // so Java and Bedrock see the same thing. 3 small packets per interval per downed player.
   // Options: true, false
   "DOWNED_PARTICLES_ENABLED": true,
+
+  // Particle type id for the downed ring (parameterless particles only, e.g. minecraft:angry_villager, minecraft:flame)
+  "DOWNED_PARTICLE_TYPE": "minecraft:angry_villager",
 
   // Ticks between particle bursts (20 per second)
   // Min: 1, Max: 2147483647
   "DOWNED_PARTICLE_INTERVAL_TICKS": 10,
+
+  // Rising spiral around the downed player while being revived (more points and higher as progress grows)
+  // and a heart burst on completion. Nothing is spawned when a revive is cancelled.
+  // Options: true, false
+  "REVIVE_PARTICLES_ENABLED": true,
+
+  // Particle type id for the revive spiral
+  "REVIVE_PARTICLE_TYPE": "minecraft:happy_villager",
+
+  // Ticks between spiral bursts (1-4 particles each)
+  // Min: 1
+  "REVIVE_PARTICLE_INTERVAL_TICKS": 2,
+
+  // Particle type id for the burst when the revive completes
+  "REVIVE_COMPLETE_PARTICLE_TYPE": "minecraft:heart",
 
   // Colors the REVIVE tag above the downed player (and so its timer) from yellow to dark red as they bleed out
   // Options: true, false

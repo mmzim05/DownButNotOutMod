@@ -4,6 +4,7 @@ import com.phasmoware.down_but_not_out.config.ModConfig;
 import com.phasmoware.down_but_not_out.handler.MessageHandler;
 import com.phasmoware.down_but_not_out.StateManager;
 import com.phasmoware.down_but_not_out.util.Constants;
+import com.phasmoware.down_but_not_out.util.ParticleUtility;
 import com.phasmoware.down_but_not_out.util.ReviveUtility;
 import com.phasmoware.down_but_not_out.util.TeamUtility;
 import net.minecraft.ChatFormatting;
@@ -93,6 +94,7 @@ public class ReviveTimer {
         }
         TeamUtility.updateRevivingTeamColor(downed);
         progress += 1.0 / getEffectiveDurationTicks(counting);
+        ParticleUtility.spawnReviveProgress(downed, Math.min(progress, 1.0));
         if (progress >= 1.0) {
             List<ServerPlayer> completed = new ArrayList<>(revivers.keySet());
             progress = 0;
