@@ -130,6 +130,8 @@ To revive your downed friend, simply hold **right-click** with an empty hand on 
   // How many ticks a revive may be invalid (aim drifted off, brief hand change, etc.) before it is cancelled.
   // Progress is paused, not lost, during this grace window. Helps Geyser Bedrock clients, which send
   // interact packets sparsely, and downed players that shift a little while being revived.
+  // NOTE: also the longest pause in right-click input before the reviver counts as having let go (progress
+  // resets); never shorter than 6 ticks because a held right-click only repeats every ~4 ticks.
   // Min: 0 (cancel immediately), Max: 999999999999999999
   "REVIVE_GRACE_TICKS": 10,
 

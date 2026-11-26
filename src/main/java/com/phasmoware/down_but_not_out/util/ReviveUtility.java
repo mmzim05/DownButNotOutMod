@@ -33,6 +33,10 @@ public class ReviveUtility {
         return hit.isPresent();
     }
 
+    public static void notifyHoldReleased(ServerPlayer reviver, ServerPlayer downed) {
+        MessageHandler.onPlayerLookingAwayWhileReviving(reviver, downed);
+    }
+
     /**
      * @param notify whether to tell the players why the revive is invalid
      */

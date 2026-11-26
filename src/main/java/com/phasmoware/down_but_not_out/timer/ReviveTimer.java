@@ -20,6 +20,7 @@ public class ReviveTimer {
     private boolean interactionActive = false;
     private long reviveProgressTicks;
     private long invalidTicks;
+    private long ticksSinceInteract;
     private int lastReportedStep = -1;
     @Nullable
     private ServerPlayer reviver;
@@ -31,6 +32,14 @@ public class ReviveTimer {
 
 
     public void tick() {
+        if (reviver != null && ++ticksSinceInteract > getHoldWindowTicks()) {
+            // no interact packet for too long: use was released, so start over
+            ReviveUtility.notifyHoldReleased(reviver, downed);
+            reviveProgressTicks = 0;
+            lastReportedStep = -1;
+            stopReviveInteraction();
+            return;
+        }
         if (ReviveUtility.checkValidReviver(reviver, downed, false)) {
             invalidTicks = 0;
             TeamUtility.updateRevivingTeamColor(downed);
@@ -56,6 +65,11 @@ public class ReviveTimer {
     }
 
 
+    // Java re-sends the interact packet every ~4 ticks while use is held, Bedrock (Geyser) at a similar rate
+    private static long getHoldWindowTicks() {
+        return Math.max(ModConfig.INSTANCE.REVIVE_GRACE_TICKS, Constants.MIN_REVIVE_HOLD_WINDOW_TICKS);
+    }
+
     private void updateReviveProgress() {
         // Bedrock redraws the overlay on every message, so only send when the shown value changes
         int step = getCurrentProgressPercent() / Constants.REVIVE_PROGRESS_MESSAGE_STEP_PERCENT;
@@ -77,6 +91,7 @@ public class ReviveTimer {
 
     public void stopReviveInteraction() {
         this.invalidTicks = 0;
+        this.ticksSinceInteract = 0;
         if (this.reviver != null) {
             this.reviver = null;
         }
@@ -87,6 +102,7 @@ public class ReviveTimer {
 
     public void continueRevive(ServerPlayer reviver) {
         this.invalidTicks = 0;
+        this.ticksSinceInteract = 0;
         if (this.reviver != reviver) {
             this.reviver = reviver;
         }

@@ -36,6 +36,8 @@ public class Constants {
     public static final double DOWNED_LOCK_TOLERANCE = 0.1;
     // further than this from the anchor means an external move (teleport, piston), so re-anchor
     public static final double DOWNED_LOCK_MAX_SNAP_DISTANCE = 3.0;
+    // shortest allowed gap between interact packets before a revive counts as released
+    public static final long MIN_REVIVE_HOLD_WINDOW_TICKS = 6;
     public static final long UPDATE_MSG_SPAM_COOLDOWN = 15;
     // revive progress is only announced each time it crosses a multiple of this many percent
     public static final int REVIVE_PROGRESS_MESSAGE_STEP_PERCENT = 10;
