@@ -171,6 +171,21 @@ Essential Mod Client:
 *   Have your friends join the server normal and enjoy! No extra steps for Geyser clients, it just works!
 
 
+## Building from Source
+
+Needs JDK 25 and Gradle 9.7.1 (the wrapper downloads Gradle). With a JDK installed, run `./gradlew build`.
+
+Without a local JDK, build in a container. This runs as your user and keeps the Gradle and Loom caches in `~/.cache/dbno-gradle`, so rebuilds are fast:
+
+```sh
+mkdir -p ~/.cache/dbno-gradle
+docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e GRADLE_USER_HOME=/gradle-home \
+  -v "$PWD":/w -v ~/.cache/dbno-gradle:/gradle-home -w /w \
+  eclipse-temurin:25-jdk ./gradlew build --no-daemon
+```
+
+The mod jar is `build/libs/down-but-not-out-<mod_version>.jar` (the `-sources` jar next to it is not needed on a server). `mod_version` is set in `gradle.properties`.
+
 ### Disclaimer
 
 This Mod is inspired by first-person shooters like Call of Duty, Fortnite, PUBG, Left For Dead, Borderlands, ect. that allow you to be downed instead of dying and revived but this mod is not affiliated with any franchise with this gameplay feature.
