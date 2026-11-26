@@ -12,58 +12,98 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import static com.phasmoware.down_but_not_out.util.DownedUtility.isDowned;
 
 public class ReviveTimer {
+    // per reviver input tracking; progress itself is shared
+    private static final class ReviverState {
+        long ticksSinceInteract;
+        long invalidTicks;
+    }
+
     @NotNull
     private final ServerPlayer downed;
+    private final Map<ServerPlayer, ReviverState> revivers = new LinkedHashMap<>();
     private boolean interactionActive = false;
-    private long reviveProgressTicks;
-    private long invalidTicks;
-    private long ticksSinceInteract;
+    // shared progress from 0.0 to 1.0; revivers joining or leaving only change the speed, never the progress
+    private double progress;
     private int lastReportedStep = -1;
-    @Nullable
-    private ServerPlayer reviver;
 
     public ReviveTimer(@Nullable ServerPlayer reviver, @NotNull ServerPlayer downed) {
-        this.reviver = reviver;
         this.downed = downed;
+        if (reviver != null) {
+            continueRevive(reviver);
+        }
     }
 
 
     public void tick() {
-        if (reviver != null && ++ticksSinceInteract > getHoldWindowTicks()) {
-            // no interact packet for too long: use was released, so start over
-            ReviveUtility.notifyHoldReleased(reviver, downed);
-            reviveProgressTicks = 0;
-            lastReportedStep = -1;
-            stopReviveInteraction();
+        if (revivers.isEmpty()) {
+            interactionActive = false;
+            decrementReviveProgress();
             return;
         }
-        if (ReviveUtility.checkValidReviver(reviver, downed, false)) {
-            invalidTicks = 0;
-            TeamUtility.updateRevivingTeamColor(downed);
-            interactionActive = true;
-            reviveProgressTicks++;
-            updateReviveProgress();
-            if (this.reviveProgressTicks >= ModConfig.INSTANCE.REVIVE_DURATION_TICKS) {
-                reviveProgressTicks = 0;
-                StateManager.onReviveComplete(downed, reviver);
-                stopReviveInteraction();
+        int counting = 0;
+        boolean released = false;
+        Iterator<Map.Entry<ServerPlayer, ReviverState>> it = revivers.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<ServerPlayer, ReviverState> entry = it.next();
+            ServerPlayer reviver = entry.getKey();
+            ReviverState state = entry.getValue();
+            if (++state.ticksSinceInteract > getHoldWindowTicks()) {
+                // no interact packet for too long: use was released
+                ReviveUtility.notifyHoldReleased(reviver, downed);
+                released = true;
+                it.remove();
+            } else if (ReviveUtility.checkValidReviver(reviver, downed, false)) {
+                state.invalidTicks = 0;
+                counting++;
+            } else if (isDowned(downed) && state.invalidTicks < ModConfig.INSTANCE.REVIVE_GRACE_TICKS) {
+                // Bedrock (Geyser) sends sparse interact packets and aim jitters, so
+                // tolerate a short run of invalid ticks: keep the reviver, pause their contribution
+                state.invalidTicks++;
+            } else {
+                ReviveUtility.checkValidReviver(reviver, downed, true);
+                it.remove();
             }
-        } else if (reviver != null && isDowned(downed) && invalidTicks < ModConfig.INSTANCE.REVIVE_GRACE_TICKS) {
-            // Bedrock (Geyser) sends sparse interact packets and aim jitters, so
-            // tolerate a short run of invalid ticks: keep the reviver, pause progress
-            invalidTicks++;
-        } else if (interactionActive || reviver != null) {
-            ReviveUtility.checkValidReviver(reviver, downed, true);
+        }
+        if (revivers.isEmpty()) {
+            interactionActive = false;
+            if (released) {
+                progress = 0;
+                lastReportedStep = -1;
+            }
+            return;
+        }
+        interactionActive = true;
+        if (counting == 0) {
+            return;
+        }
+        TeamUtility.updateRevivingTeamColor(downed);
+        progress += 1.0 / getEffectiveDurationTicks(counting);
+        if (progress >= 1.0) {
+            List<ServerPlayer> completed = new ArrayList<>(revivers.keySet());
+            progress = 0;
+            lastReportedStep = -1;
             stopReviveInteraction();
+            StateManager.onReviveComplete(downed, completed);
         } else {
-            stopReviveInteraction();
-            decrementReviveProgress();
+            updateReviveProgress();
         }
     }
 
+    // each extra simultaneous reviver cuts a percentage of the base duration, down to a floor
+    private static double getEffectiveDurationTicks(int revivers) {
+        double reduction = ModConfig.INSTANCE.MULTI_REVIVER_REDUCTION_PERCENT * (revivers - 1);
+        double percent = Math.max(100.0 - reduction, ModConfig.INSTANCE.MULTI_REVIVER_MIN_DURATION_PERCENT);
+        return Math.max(1.0, ModConfig.INSTANCE.REVIVE_DURATION_TICKS * percent / 100.0);
+    }
 
     // Java re-sends the interact packet every ~4 ticks while use is held, Bedrock (Geyser) at a similar rate
     private static long getHoldWindowTicks() {
@@ -78,37 +118,29 @@ public class ReviveTimer {
         }
         lastReportedStep = step;
         Component msgToReviver = Component.literal("Hold to Revive: " + getCurrentProgressPercent() + "%").withStyle(ChatFormatting.AQUA);
-        MessageHandler.sendThrottledUpdateMessage(msgToReviver, reviver);
+        for (ServerPlayer reviver : revivers.keySet()) {
+            MessageHandler.sendThrottledUpdateMessage(msgToReviver, reviver);
+        }
         Component msgToDowned = Component.literal("Reviving: " + getCurrentProgressPercent() + "%").withStyle(ChatFormatting.AQUA);
         MessageHandler.sendThrottledUpdateMessage(msgToDowned, downed);
     }
 
     private void decrementReviveProgress() {
-        if (reviveProgressTicks > 0) {
-            reviveProgressTicks--;
+        if (progress > 0) {
+            progress = Math.max(0, progress - 1.0 / Math.max(1, ModConfig.INSTANCE.REVIVE_DURATION_TICKS));
         }
     }
 
     public void stopReviveInteraction() {
-        this.invalidTicks = 0;
-        this.ticksSinceInteract = 0;
-        if (this.reviver != null) {
-            this.reviver = null;
-        }
-        if (this.interactionActive) {
-            this.interactionActive = false;
-        }
+        revivers.clear();
+        interactionActive = false;
     }
 
     public void continueRevive(ServerPlayer reviver) {
-        this.invalidTicks = 0;
-        this.ticksSinceInteract = 0;
-        if (this.reviver != reviver) {
-            this.reviver = reviver;
-        }
-        if (!interactionActive) {
-            interactionActive = true;
-        }
+        ReviverState state = revivers.computeIfAbsent(reviver, r -> new ReviverState());
+        state.ticksSinceInteract = 0;
+        state.invalidTicks = 0;
+        interactionActive = true;
     }
 
     public boolean isInteractionActive() {
@@ -119,6 +151,6 @@ public class ReviveTimer {
         if (ModConfig.INSTANCE.REVIVE_DURATION_TICKS <= 1) {
             return 100;
         }
-        return (int) ((((float) this.reviveProgressTicks / (float) ModConfig.INSTANCE.REVIVE_DURATION_TICKS)) * 100);
+        return (int) (progress * 100);
     }
 }

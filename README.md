@@ -127,6 +127,15 @@ To revive your downed friend, simply hold **right-click** with an empty hand on 
   // Min: 0 (instant), Max: 999999999999999999 (virtually impossible)
   "REVIVE_DURATION_TICKS": 60,
   
+  // Each additional player reviving the same downed player at the same time cuts this percent of the base
+  // REVIVE_DURATION_TICKS (shared progress, everyone has to keep holding). 0 disables the bonus.
+  // Min: 0.0, Max: 100.0
+  "MULTI_REVIVER_REDUCTION_PERCENT": 10.0,
+
+  // The revive never takes less than this percent of REVIVE_DURATION_TICKS, however many revivers help
+  // Min: 1.0, Max: 100.0
+  "MULTI_REVIVER_MIN_DURATION_PERCENT": 25.0,
+
   // How many ticks a revive may be invalid (aim drifted off, brief hand change, etc.) before it is cancelled.
   // Progress is paused, not lost, during this grace window. Helps Geyser Bedrock clients, which send
   // interact packets sparsely, and downed players that shift a little while being revived.

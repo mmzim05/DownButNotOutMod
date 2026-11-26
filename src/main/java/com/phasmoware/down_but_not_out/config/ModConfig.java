@@ -24,6 +24,8 @@ public final class ModConfig {
     public float REVIVED_SOUND_VOLUME = 2.5F;
     public float DOWNED_SOUND_VOLUME = 1.0F;
     public float DOWNED_MOVE_SPEED = 0.01F;
+    public double MULTI_REVIVER_REDUCTION_PERCENT = 10.0D;
+    public double MULTI_REVIVER_MIN_DURATION_PERCENT = 25.0D;
     public long REVIVE_GRACE_TICKS = 10L;
     public double REVIVE_AIM_TOLERANCE = 0.3D;
     public boolean DOWNED_LOCK_POSITION = false;

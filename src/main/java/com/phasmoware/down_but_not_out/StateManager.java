@@ -2,6 +2,8 @@ package com.phasmoware.down_but_not_out;
 
 import com.phasmoware.down_but_not_out.mixinterface.ServerPlayerDuck;
 import com.phasmoware.down_but_not_out.config.ModConfig;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.phasmoware.down_but_not_out.handler.MessageHandler;
 import com.phasmoware.down_but_not_out.timer.ReviveTimer;
 import com.phasmoware.down_but_not_out.util.*;
@@ -52,8 +54,9 @@ public class StateManager {
         ServerCrawlUtility.cleanUpForceCrawlEntities((ServerPlayerDuck) player);
     }
 
-    public static void onReviveComplete(ServerPlayer player, ServerPlayer reviver) {
-        MessageHandler.broadcastMessageToPlayers(reviver.getName().tryCollapseToString() +
+    public static void onReviveComplete(ServerPlayer player, List<ServerPlayer> revivers) {
+        String reviverNames = revivers.stream().map(r -> r.getName().tryCollapseToString()).collect(Collectors.joining(" and "));
+        MessageHandler.broadcastMessageToPlayers(reviverNames +
                 Constants.REVIVED_MSG + player.getName().tryCollapseToString(), player.level(), ChatFormatting.GREEN);
         ServerPlayerDuck serverPlayer = (ServerPlayerDuck) player;
         ReviveUtility.applyRevivedPenalty(serverPlayer);
