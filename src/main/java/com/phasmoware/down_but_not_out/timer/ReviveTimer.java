@@ -3,6 +3,7 @@ package com.phasmoware.down_but_not_out.timer;
 import com.phasmoware.down_but_not_out.config.ModConfig;
 import com.phasmoware.down_but_not_out.handler.MessageHandler;
 import com.phasmoware.down_but_not_out.StateManager;
+import com.phasmoware.down_but_not_out.util.Constants;
 import com.phasmoware.down_but_not_out.util.ReviveUtility;
 import com.phasmoware.down_but_not_out.util.TeamUtility;
 import net.minecraft.ChatFormatting;
@@ -18,7 +19,11 @@ public class ReviveTimer {
     private final ServerPlayer downed;
     private boolean interactionActive = false;
     private long reviveProgressTicks;
+<<<<<<< HEAD
     private long invalidTicks;
+=======
+    private int lastReportedStep = -1;
+>>>>>>> fix/4-progress-message-flash
     @Nullable
     private ServerPlayer reviver;
 
@@ -55,6 +60,12 @@ public class ReviveTimer {
 
 
     private void updateReviveProgress() {
+        // Bedrock redraws the overlay on every message, so only send when the shown value changes
+        int step = getCurrentProgressPercent() / Constants.REVIVE_PROGRESS_MESSAGE_STEP_PERCENT;
+        if (step == lastReportedStep) {
+            return;
+        }
+        lastReportedStep = step;
         Component msgToReviver = Component.literal("Hold to Revive: " + getCurrentProgressPercent() + "%").withStyle(ChatFormatting.AQUA);
         MessageHandler.sendThrottledUpdateMessage(msgToReviver, reviver);
         Component msgToDowned = Component.literal("Reviving: " + getCurrentProgressPercent() + "%").withStyle(ChatFormatting.AQUA);

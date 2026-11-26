@@ -37,6 +37,8 @@ public class Constants {
     // further than this from the anchor means an external move (teleport, piston), so re-anchor
     public static final double DOWNED_LOCK_MAX_SNAP_DISTANCE = 3.0;
     public static final long UPDATE_MSG_SPAM_COOLDOWN = 15;
+    // revive progress is only announced each time it crosses a multiple of this many percent
+    public static final int REVIVE_PROGRESS_MESSAGE_STEP_PERCENT = 10;
     public static final long REPEAT_MSG_SPAM_COOLDOWN = 60;
     public static final int MIN_HEARTBEAT_INTERVAL = 10;
     public static final int MAX_HEARTBEAT_INTERVAL = 100;
