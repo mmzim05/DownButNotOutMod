@@ -33,6 +33,8 @@ public class Constants {
     public static final double MIN_ENTITY_SCALE = 0.0625d;
     public static final double Y_OFFSET = 0.86;
     public static final long UPDATE_MSG_SPAM_COOLDOWN = 15;
+    // revive progress is only announced each time it crosses a multiple of this many percent
+    public static final int REVIVE_PROGRESS_MESSAGE_STEP_PERCENT = 10;
     public static final long REPEAT_MSG_SPAM_COOLDOWN = 60;
     public static final int MIN_HEARTBEAT_INTERVAL = 10;
     public static final int MAX_HEARTBEAT_INTERVAL = 100;

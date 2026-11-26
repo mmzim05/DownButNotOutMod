@@ -75,8 +75,10 @@ public class TeamUtility {
     public static void updateTempTeamColor(ServerPlayer player, ChatFormatting color) {
         if (getTempDownedTeam(player) != null) {
             PlayerTeam team = getTempDownedTeam(player);
-            if (team != null && !(team.getColor().equals(color))) {
-                team.setColor(Optional.of(fromFormatting(color)));
+            // compare the team color to the new one so a team update packet is only sent on change
+            Optional<TeamColor> newColor = Optional.of(fromFormatting(color));
+            if (team != null && !team.getColor().equals(newColor)) {
+                team.setColor(newColor);
             }
         }
     }
